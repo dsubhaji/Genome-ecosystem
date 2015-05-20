@@ -1,78 +1,99 @@
-library(RMySQL)
-mydb = dbConnect(MySQL(), user='root', password='------', dbname='gnome', host='localhost')
-require(ggplot2)
+library(ggplot2)
+gnome = dbConnect(MySQL(), user='root', password='', dbname= 'gnome', host='localhost')
 
-repeat
-{
-  choice <- readline(prompt= "Select your choice: \n
-   0.Generate csv\n
-   1.Number of times each person is the committer\n
-   2.Number of times each person is the author\n
-   3.Number of diff repo each person committed to\n
-   4.Number of diff repo each person authored to \n
-   5.Exit\n")
+
+repeat{
+option <- readline(prompt="Please select from following options: 
+         \n0: Generate csv file
+         \n1: Number of committers
+         \n2: Number of authors
+         \n3: Number of repo each person commits to
+         \n4: Number of repo: authored commits to
+         \n5: Exit ")
+
+
+print(option)
+
+if(option==0) {
+  overviewCommitters = dbGetQuery(gnome, "select people_merged.id as 'people',count(scmlog.id) as 'committers', count(distinct repository_id) as 'repositoryCommitter' 
+                                         FROM scmlog 
+                                         JOIN people_merged ON scmlog.committer_id = people_merged.id 
+                                         GROUP BY scmlog.committer_id;")
   
-  print(choice)
-  if (choice==0)
-  {
-    c1n3 = fetch(dbSendQuery(mydb,"select pm.id as 'people_id', count(s.id) as 'isCommitter', count(distinct repository_id) as 'repoCommitted' from scmlog s join people_merged pm on s.committer_id=pm.id group by s.committer_id;"))
-    c2n4 = fetch(dbSendQuery(mydb, "select pm.id as 'people_id', count(s.id) as 'isAuthor', count(distinct repository_id) as 'repoAuthored' from scmlog s join people_merged pm on s.author_id =pm.id group by s.author_id;"))  
-    total<-merge(x= c1n3, y=c2n4)
-    write.csv(file="people-pre-analysis/pView Data in csv/poverview.csv", x=total)
-    
-  }
+  overviewAuthors = dbGetQuery(gnome,"select people_merged.id as 'people',count(scmlog.id) as 'authors', count(distinct repository_id) as 'repositoryAuthor' 
+                                      FROM scmlog 
+                                      JOIN people_merged ON scmlog.author_id = people_merged.id 
+                                      GROUP BY scmlog.author_id;")
+  completedata <- merge(x=overviewCommitters, y=overviewAuthors)
+  write.csv(file="R language/1st Project/pOverview.csv", x=completedata)
   
-  
-  if (choice==1)
-  {
-    NumTimeCommitter = fetch(dbSendQuery(mydb, "select pm.id as 'people_id', count(s.id) as 'pCommitter' from scmlog s join people_merged pm on s.committer_id=pm.id group by s.committer_id;"))
-    attach(NumTimeCommitter)
-    ggplot(NumTimeCommitter, aes(x=pCommitter)) + geom_histogram() + ylab("Frequency") + ggtitle("Number of times each person is the committer")
-    ggsave(file="people-pre-analysis/NumTimeCommitter/PhistoCommitter.png")
-    ggplot(NumTimeCommitter, aes(x=people_id, y=pCommitter)) + geom_boxplot() + ylab("No.of times") + ggtitle("Number of times each person is the committer")
-    ggsave(file="people-pre-analysis/NumTimeCommitter/PboxCommitter.png")
-    
-  }
-  
-  
-  if (choice==2)
-  {
-    NumTimeAuthors  = fetch(dbSendQuery(mydb, "select pm.id as 'people_id', count(s.id) as 'pAuthor' from scmlog s join people_merged pm on s.author_id=pm.id group by s.author_id;"))
-    attach(NumTimeAuthors)
-    ggplot(NumTimeAuthors, aes(x=pAuthor)) + geom_histogram() + ylab("Frequency") + ggtitle("Number of times each person is the author")
-    ggsave(file="people-pre-analysis/NumTimeAuthor/PhistoAuthor.png")
-    ggplot(NumTimeAuthors, aes(x=people_id, y=pAuthor)) + geom_boxplot() + ylab("No.of times") + ggtitle("Number of times each person is the author")
-    ggsave(file="people-pre-analysis/NumTimeAuthor/PboxAuthor.png")
-  }
-  
-  
-  if (choice==3)
-  {
-    pTimesCommitted = fetch(dbSendQuery(mydb, "select committer_id as 'Committer' , count(distinct repository_id) as 'repoCommitted' from scmlog group by committer_id;"))
-    attach(pTimesCommitted)
-    ggplot(pTimesCommitted, aes(x=repoCommitted)) + geom_histogram() + ylab("Frequency") + ggtitle("Number of diff repo each person committed to")
-    ggsave(file="people-pre-analysis/NumTimeCommitted/PhistoCommitted.png")
-    ggplot(pTimesCommitted, aes(x=Committer, y=repoCommitted)) + geom_boxplot() + ylab("Number of Repo Committed") + ggtitle("Number of diff repo each person committed to")
-    ggsave(file="people-pre-analysis/NumTimeCommitted/PboxCommitted.png")
-  }
-  
-  
-  if (choice==4)
-  {
-    pTimesAuthored = fetch(dbSendQuery(mydb, "select author_id as 'Author' , count(distinct repository_id) as 'repoAuthored' from scmlog group by author_id;"))
-    attach(pTimesAuthored)
-    ggplot(pTimesAuthored, aes(x=repoAuthored)) + geom_histogram() + ylab("Frequency") + ggtitle("Number of diff repo each person authored to")
-    ggsave(file="people-pre-analysis/NumTimeAuthored/PhistoAuthored.png")
-    ggplot(pTimesAuthored, aes(x=Author, y=repoAuthored)) + geom_boxplot() + ylab("Number of Repo Authored") + ggtitle("Number of diff repo each person authored to")
-    ggsave(file="people-pre-analysis/NumTimeAuthored/PboxAuthored.png")
-  }
-  
-  
-  if (choice==5)
-  {
-    readline(prompt <- "Bye Bye~ ~ ~")
-    break
-  }
+
   
 }
+if(option== 1) {
+  #fetch the number of times each person is the committer
+  pCommitters = dbGetQuery(gnome, "SELECT people_merged.id as 'people',count(scmlog.id) as 'committers'
+                                          FROM scmlog
+                                          JOIN people_merged ON scmlog.committer_id = people_merged.id
+                                          GROUP BY scmlog.committer_id;")
+  
+  #plot histogram for Number of times each person is the committer
+  pCommitsHist <- ggplot(pCommitters, aes(committers)) + geom_histogram() + ylab("Frequency") +ggtitle("No. Of people as committers")
+  ggsave("R language/1st Project/graphs/people-pre-analysis/Committer/pCommitterHistogram.png")
+  
+ 
+  #plot boxplot for number of times each person is the committer
+  #boxplot with continuous x
+  pCommitsBox <- ggplot(pCommitters, aes(people,committers)) + geom_boxplot() + ylab("Number of people")+ ggtitle("No. Of people as committers")
+  ggsave("R language/1st Project/graphs/people-pre-analysis/Committer/pCommitterBoxPlot.png")
+}
+if(option==2){
+  #fetch the number of times each person is the author
+  pAuthors = dbGetQuery(gnome,"SELECT  people_merged.id as 'people',count(scmlog.id) as 'authors'
+                                      FROM scmlog
+                                      JOIN people_merged ON scmlog.author_id = people_merged.id
+                                      GROUP BY scmlog.author_id;")
+  
+  #plot histogram for the number of times each person is the author
+  pAuthorsHist <- ggplot(pAuthors, aes(authors)) + geom_histogram() + ylab("Frequency") +ggtitle("No. Of people as authors")
+  ggsave("R language/1st Project/graphs/people-pre-analysis/Author/pAuthorsHistogram.png")
 
+  #plot boxplot for the number of times each person is the author
+  pAuthorsBox <- ggplot(pAuthors, aes(people, authors)) + geom_boxplot() + ylab("Number of authors") +ggtitle("No. Of people as authors")
+  ggsave("R language/1st Project/graphs/people-pre-analysis/Author/pAuthorsBoxPlot.png")
+}
+if(option==3) {
+  #fetch number of different repositories each person has committed to
+pRepoOfCommitters = dbGetQuery(gnome, "select committer_id as 'committer',count(distinct repository_id) as 'repository'
+                                              from scmlog
+                                              group by committer_id;")
+#plot histogram for the  number of different repositories each person has committed to
+pRepoCommitHist <- ggplot(pRepoOfCommitters, aes(repository)) + geom_histogram() + ylab("Frequency") +ggtitle("No. Of different repos per committer")
+ggsave("R language/1st Project/graphs/people-pre-analysis/RepoOfCommitters/pRepoCommitterHist.png")
+
+#plot boxplot for the number of different repositories each person has committed to
+pRepoCommitBox <- ggplot(pRepoOfCommitters, aes(committer, repository)) + geom_boxplot() + ylab("Number of repository") +ggtitle("No. Of different repos per committer")
+ggsave("R language/1st Project/graphs/people-pre-analysis/RepoOfCommitters/pRepoCommitterBoxPlot.png")
+
+
+}
+if(option==4) {
+  
+ #fetch number of different repositories each person has authored commits to
+  pRepoOfAuthors = dbGetQuery(gnome, "select author_id as 'author' ,count(distinct repository_id) as 'repository'
+                                              from scmlog
+                                              group by author_id;")
+  
+  #plot histogram for the number of different repositories each person has authored commits to
+  pRepoAuthorHist <- ggplot(pRepoOfAuthors, aes(repository)) + geom_histogram() + ylab("Frequency") +ggtitle("No. Of different repos per authors")
+  ggsave("R language/1st Project/graphs/people-pre-analysis/RepoOfAuthors/pRepoAuthorHist.png")
+
+  #plot boxplot for the number of different repositories each person has authored commits to
+  pRepoAuthorBox <- ggplot(pRepoOfAuthors, aes(author, repository)) + geom_boxplot() + ylab("Number of repository") +ggtitle("No. Of different repos per author")
+  ggsave("R language/1st Project/graphs/people-pre-analysis/RepoOfAuthors/pRepoAuthorBoxPlot.png")
+  
+}
+if(option==5) {
+  break; }
+
+}
