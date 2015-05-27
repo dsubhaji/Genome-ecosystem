@@ -1,11 +1,13 @@
+library(RMySQL)
 library(ggplot2)
-gnome = dbConnect(MySQL(), user='root', password='', dbname= 'gnome', host='localhost')
+
+gnome = dbConnect(MySQL(), user=.rs.askForPassword("Enter user:"), password=.rs.askForPassword("Enter password:"), dbname=.rs.askForPassword("Enter database:"), host='localhost')
 
 
 repeat{
 choice <- readline(prompt="Please select from following options: 
          \n0: Generate csv file
-         \n1: Number of Commits
+         \n1: Number of Commits 
          \n2: Number of Committers
          \n3: Number of Authors
          \n4: Number of Files
@@ -18,7 +20,7 @@ if(choice==0){
                   from scmlog s, commits_activities c
                   where c.id = s.id
                   group by s.repository_id;"))
-  write.csv(file="R language/1st Project/overview.csv", x=overview)
+  write.csv(file="overview.csv", x=overview)
 }
 
 if(choice==1){
@@ -26,14 +28,14 @@ if(choice==1){
   noOfCommits = fetch(dbSendQuery(gnome, "select  count(distinct date) as 'commits', repository_id 
                     FROM scmlog
                     GROUP BY repository_id;")) 
-  
+ 
   #plot histogram for number of commits per repo
   commitsHist <- ggplot(noOfCommits, aes(commits)) + geom_histogram() + ylab("Frequency") +ggtitle("No. Of Commits per Repo")
-  ggsave("R language/1st Project/graphs/Commits/commitHistogram.png")
+  ggsave("commitHistogram.png")
   
   #plot boxplot for number of commits per repo
   commitsBox <- ggplot(noOfCommits, aes(repository_id, commits)) + geom_boxplot() + ylab("Number of Commits")+ ggtitle("No. Of Commits per Repo")
-  ggsave("R language/1st Project/graphs/Commits/commitBoxPlot.png")
+  ggsave("commitBoxPlot.png")
 }
   
 
@@ -45,11 +47,11 @@ if(choice==2){
   
   #plot histogram for number of committers per repo
   committersHist <- ggplot(noOfCommitters, aes(committers)) + geom_histogram() + ylab("Frequency") +ggtitle("No. Of Committers per Repo")
-  ggsave("R language/1st Project/graphs/Committers/committersHistogram.png")
+  ggsave("committersHistogram.png")
   
   #plot box plot for number of committers per repo
   committersBox <- ggplot(noOfCommitters, aes(repository_id,committers)) + geom_boxplot()+ ylab("Number of Committers") + ggtitle("No. Of Committers per Repo")
-  ggsave("R language/1st Project/graphs/Committers/committersBoxPlot.png")
+  ggsave("committersBoxPlot.png")
 }
 
 
@@ -61,11 +63,11 @@ if(choice==3){
   
   #plot histogram for number of authors per repo
   authorsHist <- ggplot(noOfAuthors, aes(authors)) + geom_histogram() + ylab("Frequency") +ggtitle("No. Of Authors per Repo")
-  ggsave("R language/1st Project/graphs/Authors/authorsHistogram.png")
+  ggsave("authorsHistogram.png")
   
   #plot boxplot for number of authors per repo
   authorsBox <- ggplot(noOfAuthors, aes(repository_id, authors)) + geom_boxplot() + ylab("Number of Authors") +ggtitle("No. Of Authors per Repo")
-  ggsave("R language/1st Project/graphs/Authors/authorsBoxPlot.png")
+  ggsave("R language/1st Project/graphs/repo-pre-analysis/Authors/authorsBoxPlot.png")
 }
 
 
@@ -78,11 +80,11 @@ if(choice==4){
   
   #plot histogram for number of files per repo
   filesHist <- ggplot(noOfFiles, aes(files)) + geom_histogram() + ylab("Frequency") +ggtitle("No. Of Files per Repo")
-  ggsave("R language/1st Project/graphs/Files/filesHistogram.png")
+  ggsave("filesHistogram.png")
   
   #plot boxplot for number of files per repo
   filesBox <- ggplot(noOfFiles, aes(repository_id, files)) + geom_boxplot() + ylab("Number of Files") +ggtitle("No. Of Files per Repo")
-  ggsave("R language/1st Project/graphs/Files/filesBoxPlot.png")
+  ggsave("filesBoxPlot.png")
 }
 
 if(choice==5){
