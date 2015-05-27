@@ -55,7 +55,27 @@ shinyServer(function(input, output) {
   })
  
  # Correlation coefficient
-
+output$cor <- renderPrint({
+  
+  df=filedata()
+  fr=input$from
+  to=input$to
+  
+  firstVar = as.vector(df[[fr]])
+  secondVar = as.vector(df[[to]])
+  data = data.frame(firstVar,secondVar,stringsAsFactors=F)
+  first=data$firstVar
+  second=data$secondVar
+  
+  # Calculate both the Pearson and Spearman correlation coefficients between the two columns selected by the user 
+  pearson <- cor(first, second, method="pearson")
+  p <- paste("Pearson:", pearson)
+  print(p)
+  spearman <- cor(first, second, method="spearman")
+  s <- paste("Spearman:", spearman)
+  print(s)
+  
+})
  
  
  # Draw a scatterplot of the two columns selected by the user
