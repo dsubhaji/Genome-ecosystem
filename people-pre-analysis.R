@@ -2,7 +2,6 @@ library(ggplot2)
 library(RMySQL)
 
 gnome = dbConnect(MySQL(), user=.rs.askForPassword("Enter user:"), password=.rs.askForPassword("Enter password:"), dbname=.rs.askForPassword("Enter database:"), host='localhost')
-
 repeat{
   option <- readline(prompt="Select from following options:
   0: Generate csv file\n
@@ -87,7 +86,7 @@ repeat{
     
     #plot histogram for the number of different repositories each person has authored commits to
     pRepoAuthorHist <- ggplot(pRepoOfAuthors, aes(repository)) + geom_histogram() + ylab("Frequency") +ggtitle("No. Of different repos per authors")
-    ggsave("R language/1st Project/graphs/people-pre-analysis/RepoOfAuthors/pRepoAuthorHist.png")
+    ggsave("pRepoAuthorHist.png")
     
     #plot boxplot for the number of different repositories each person has authored commits to
     pRepoAuthorBox <- ggplot(pRepoOfAuthors, aes(author, repository)) + geom_boxplot() + ylab("Number of repository") +ggtitle("No. Of different repos per author")
