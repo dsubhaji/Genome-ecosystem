@@ -25,9 +25,9 @@ if(choice==0){
 
 if(choice==1){
   # fetch number of commits for each repository
-  noOfCommits = fetch(dbSendQuery(gnome, "select  count(distinct date) as 'commits', repository_id 
+  noOfCommits = dbGetQuery(gnome, "select  count(distinct date) as 'commits', repository_id 
                     FROM scmlog
-                    GROUP BY repository_id;")) 
+                    GROUP BY repository_id;")
  
   #plot histogram for number of commits per repo
   commitsHist <- ggplot(noOfCommits, aes(commits)) + geom_histogram() + ylab("Frequency") +ggtitle("No. Of Commits per Repo")
@@ -41,9 +41,9 @@ if(choice==1){
 
 if(choice==2){
   #fetch number of committers for each repository
-  noOfCommitters = fetch(dbSendQuery(gnome, "select  count(distinct committer_id) as 'committers', repository_id
+  noOfCommitters =dbGetQuery(gnome, "select  count(distinct committer_id) as 'committers', repository_id
                         from scmlog
-                        group by repository_id; "))
+                        group by repository_id; ")
   
   #plot histogram for number of committers per repo
   committersHist <- ggplot(noOfCommitters, aes(committers)) + geom_histogram() + ylab("Frequency") +ggtitle("No. Of Committers per Repo")
@@ -57,9 +57,9 @@ if(choice==2){
 
 if(choice==3){
   #fetch the number of authors for each repository
-  noOfAuthors = fetch(dbSendQuery(gnome, "select  count(distinct author_id) as 'authors', repository_id
+  noOfAuthors = dbGetQuery(gnome, "select  count(distinct author_id) as 'authors', repository_id
                                       from scmlog
-                                      group by repository_id;"))
+                                      group by repository_id;")
   
   #plot histogram for number of authors per repo
   authorsHist <- ggplot(noOfAuthors, aes(authors)) + geom_histogram() + ylab("Frequency") +ggtitle("No. Of Authors per Repo")
@@ -73,10 +73,10 @@ if(choice==3){
 
 if(choice==4){
   #fetch the number of files for each repository
-  noOfFiles = fetch(dbSendQuery(gnome, "select count(distinct c.intensity) as 'files' , s.repository_id
+  noOfFiles = dbGetQuery(gnome, "select count(distinct c.intensity) as 'files' , s.repository_id
                                       from commits_activities c, scmlog s
                                       where c.id = s.id
-                                      group by s.repository_id;"))
+                                      group by s.repository_id;")
   
   #plot histogram for number of files per repo
   filesHist <- ggplot(noOfFiles, aes(files)) + geom_histogram() + ylab("Frequency") +ggtitle("No. Of Files per Repo")
@@ -88,6 +88,8 @@ if(choice==4){
 }
 
 if(choice==5){
+  
+  
   break;
   
 }
