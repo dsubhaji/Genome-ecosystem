@@ -16,10 +16,10 @@ choice <- readline(prompt="Please select from following options:
 
 print(choice)
 if(choice==0){
-  overview = fetch(dbSendQuery(gnome,"select distinct s.repository_id, count(distinct s.date) as 'commits', count(distinct s.committer_id) as 'committers', count(distinct s.author_id) as 'authors', count( distinct c.intensity) as 'files'
+  overview = dbGetQuery(gnome,"select distinct s.repository_id, count(distinct s.date) as 'commits', count(distinct s.committer_id) as 'committers', count(distinct s.author_id) as 'authors', count( distinct c.intensity) as 'files'
                   from scmlog s, commits_activities c
                   where c.id = s.id
-                  group by s.repository_id;"))
+                  group by s.repository_id;")
   write.csv(file="overview.csv", x=overview)
 }
 
