@@ -68,7 +68,7 @@ if(choice==3){
   
   #plot boxplot for number of authors per repo
   authorsBox <- ggplot(noOfAuthors, aes(repository_id, authors)) + geom_boxplot() + ylab("Number of Authors") +ggtitle("No. Of Authors per Repo")
-  ggsave("R language/1st Project/graphs/repo-pre-analysis/Authors/authorsBoxPlot.png")
+  ggsave("authorsBoxPlot.png")
 }
 
 
