@@ -1,138 +1,114 @@
 library(RMySQL)
-library(ggplot2)
 
 username <- readline(prompt= "Please enter your user name: ")
 pass <- readline(prompt= "Please enter your password: ")
 db <- readline(prompt= "Please enter your database name: ")
-gnome = dbConnect(MySQL(), user=username, password=pass, dbname=db, host='localhost')
+mydb = dbConnect(MySQL(), user=username, password=pass, dbname=db, host='localhost')
 
+require(ggplot2)
 
-repeat{
-choice <- readline(prompt="Please select from following options: 
-         \n0: Generate csv file
-         \n1: Number of Commits 
-         \n2: Number of Committers
-         \n3: Number of Authors
-         \n4: Number of Files
-         \n5: Exit program")
-
-
-print(choice)
-
-## edited 1,2,3 ####
-if(choice==0){
-  overview = dbGetQuery(gnome,"select r.id as 'repository', count(distinct s.date) as 'commits', 
-  					count(distinct s.committer_id) as 'committers', 
-                        count(distinct s.author_id) as 'authors'      
-                  from repositories r
-                  left outer join scmlog s
-                  on r.id = s.repository_id
-                  group by r.id;")
-  overview2 = dbGetQuery(gnome, "select r.id as 'repository', count(distinct f.file_name) as 'files'
-                                from repositories r 
-                                left outer join files f
-                                on r.id = f.repository_id
-                                group by r.id;")
-  completeoverview <- merge(x=overview, y=overview2)
-  write.csv(file="overview.csv", x=completeoverview)
+repeat
+{
+  choice <- readline(prompt= "Select your choice: \n
+       0.Generate csv\n
+       1.Number of Commits\n
+       2.Number of Authors\n
+       3.Number of Committers\n
+       4.Number of Files \n
+       5.Exit program\n")
   
-
-  
-}
-
-if(choice==1){
-  # fetch number of commits for each repository
-  noOfCommits = dbGetQuery(gnome, "select r.id as 'repository', count(distinct s.date) as 'commits'
-                                    from repositories r
-                                    left outer join scmlog s
-                                    on r.id = s.repository_id
-                                    group by r.id;")
- 
-  #plot histogram for number of commits per repo
-  commitsHist <- ggplot(noOfCommits, aes(commits)) + geom_histogram() + ylab("Frequency") +ggtitle("No. Of Commits per Repo")
-  ggsave("commitHistogram.png")
-  
-  #plot boxplot for number of commits per repo
-  commitsBox <- ggplot(noOfCommits, aes(repository, commits)) + geom_boxplot() + ylab("Number of Commits")+ ggtitle("No. Of Commits per Repo")
-  ggsave("commitBoxPlot.png")
-}
-  
-
-if(choice==2){
-  #fetch number of committers for each repository
-  noOfCommitters =dbGetQuery(gnome, "select r.id as 'repository', count(distinct s.committer_id) as 'committers'
-from repositories r
-left outer join scmlog s
-on r.id = s.repository_id
-group by r.id; ")
-  
-  #plot histogram for number of committers per repo
-  committersHist <- ggplot(noOfCommitters, aes(committers)) + geom_histogram() + ylab("Frequency") +ggtitle("No. Of Committers per Repo")
-  ggsave("committersHistogram.png")
-  
-  #plot box plot for number of committers per repo
-  committersBox <- ggplot(noOfCommitters, aes(repository,committers)) + geom_boxplot()+ ylab("Number of Committers") + ggtitle("No. Of Committers per Repo")
-  ggsave("committersBoxPlot.png")
-}
-
-
-if(choice==3){
-  #fetch the number of authors for each repository
-  noOfAuthors = dbGetQuery(gnome, "select r.id as 'repository', count(distinct s.author_id) as 'authors'
-from repositories r
-left outer join scmlog s
-on r.id = s.repository_id
-group by r.id;")
-  
-  #plot histogram for number of authors per repo
-  authorsHist <- ggplot(noOfAuthors, aes(authors)) + geom_histogram() + ylab("Frequency") +ggtitle("No. Of Authors per Repo")
-  ggsave("authorsHistogram.png")
-  
-  #plot boxplot for number of authors per repo
-  authorsBox <- ggplot(noOfAuthors, aes(repository, authors)) + geom_boxplot() + ylab("Number of Authors") +ggtitle("No. Of Authors per Repo")
-  ggsave("authorsBoxPlot.png")
-}
-
-
-if(choice==4){
-  #fetch the number of files for each repository
-  noOfFiles = dbGetQuery(gnome, "select r.id as 'repository', count(distinct f.file_name) as 'files'
-from repositories r 
-left outer join files f
-on r.id = f.repository_id
-group by r.id;")
-  
-  #plot histogram for number of files per repo
-  filesHist <- ggplot(noOfFiles, aes(files)) + geom_histogram() + ylab("Frequency") +ggtitle("No. Of Files per Repo")
-  ggsave("filesHistogram.png")
-  
-  #plot boxplot for number of files per repo
-  filesBox <- ggplot(noOfFiles, aes(repository, files)) + geom_boxplot() + ylab("Number of Files") +ggtitle("No. Of Files per Repo")
-  ggsave("filesBoxPlot.png")
-}
-
-if(choice==5){
+  print(choice)
+  if (choice==0)
+  {
+    c123 = dbGetQuery(mydb,"select r.id, 
+                          count(distinct s.date) as 'Commits', 
+                          count(distinct s.author_id) as 'Authors',
+                          count(distinct s.committer_id) as 'Committers'
+                          from repositories r
+  					              left join scmlog s
+                          on r.id=s.repository_id
+                          group by r.id;")
+    
+    c4 = dbGetQuery(mydb, "select r.id,               
+                          count(distinct f.file_name) as 'Files'
+                          from repositories r
+                          left join files f
+                          on r.id=f.repository_id
+                          group by r.id;")  
+    
+    total<-merge(x= c123, y=c4)
+    write.csv(file="overview.csv", x=total)
+    
+  }
   
   
-  break;
+  if (choice==1)
+  {
+    NoCommits = dbGetQuery(mydb, "select r.id, count(distinct s.date) as 'Commit' 
+                           from repositories r
+                           left outer join scmlog s
+                           on s.repository_id = r.id
+                           group by r.id;")
+    attach(NoCommits)
+    ggplot(NoCommits, aes(x=Commit)) + geom_histogram() + ylab("Frequency") + ggtitle("Number of Commits per Repo")
+    ggsave(file="HistoCommits.png")
+    ggplot(NoCommits, aes(x=id, y=Commit)) + geom_boxplot() + ylab("No.of Commits") + ggtitle("Number of Commits per Repo")
+    ggsave(file="BoxCommits.png")
+    
+  }
+  
+  
+  if (choice==2)
+  {
+    NoAuthors  = dbGetQuery(mydb, "select r.id, count(distinct s.author_id) as 'Author' 
+                            from repositories r
+                            left outer join scmlog s
+                            on s.repository_id = r.id
+                            group by r.id;")
+    attach(NoAuthors)
+    ggplot(NoAuthors, aes(x=Author)) + geom_histogram() + ylab("Frequency") + ggtitle("Number of Authors per Repo")
+    ggsave(file="HistoAuthors.png")
+    ggplot(NoAuthors, aes(x=id, y=Author)) + geom_boxplot() + ylab("No.of Authors") + ggtitle("Number of Authors per Repo")
+    ggsave(file="BoxAuthors.png")
+    
+  }
+  
+  
+  if (choice==3)
+  {
+    NoCommitters = dbGetQuery(mydb, "select r.id, count(distinct s.committer_id) as 'Committer' 
+                              from repositories r
+                              left outer join scmlog s
+                              on s.repository_id = r.id
+                              group by r.id;")
+    attach(NoCommitters)
+    ggplot(NoCommitters, aes(x=Committer)) + geom_histogram() + ylab("Frequency") + ggtitle("Number of Committers per Repo")
+    ggsave(file="HistoCommitters.png")
+    ggplot(NoCommitters, aes(x=id, y=Committer)) + geom_boxplot() + ylab("No.of Committers") + ggtitle("Number of Committers per Repo")
+    ggsave(file="BoxCommitters.png")
+  }
+  
+  
+  if (choice==4)
+  {
+    NoFiles = dbGetQuery(mydb, "select r.id, count(distinct f.file_name) as 'File'
+                         from repositories r
+                         left outer join files f
+                         on f.repository_id = r.id
+                         group by r.id;")
+    attach(NoFiles)
+    ggplot(NoFiles, aes(x=File)) + geom_histogram() + ylab("Frequency") + ggtitle("Number of Files per Repo")
+    ggsave(file="HistoFiles.png")
+    ggplot(NoFiles, aes(x=id, y=File)) + geom_boxplot() + ylab("No.of Files") + ggtitle("Number of Files per Repo")
+    ggsave(file="BoxFiles.png")
+  }
+  
+  
+  if (choice==5)
+  {
+    readline(prompt <- "Bye Bye~")
+    break
+  }
   
 }
-
-}
-
-
-
-#to view plots: 
-#commitsHist : a histogram of number of commits for each repository
-#commitsBox : a box plot of number of commits for each repository
-#committersHist : a histogram of number of committers for each repository
-#committersBox : a box plot of number of committers for each repository
-#authorsHist : a histogram of number of authors for each repository
-#authorsBox : a box plot of number of authors for each repository
-#filesHist : a histogram of number of files for each repository
-#filesHist : a box plot of number of files for each repository
-
-
-
-
 
