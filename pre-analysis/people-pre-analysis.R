@@ -18,12 +18,12 @@ repeat{
   print(option)
   
   if(option==0) {
-    overviewCommitters = dbGetQuery(gnome, "select people_merged.id as 'people',count(scmlog.id) as 'committers', count(distinct repository_id) as 'repositoryCommitter' 
+    overviewCommitters = dbGetQuery(gnome, "select people_merged.id as 'people',count(scmlog.id) as 'committers', count(distinct scmlog.repository_id) as 'repositoryCommitter' 
                                     FROM people_merged 
     					              LEFT OUTER JOIN scmlog ON scmlog.committer_id = people_merged.id 
 							              GROUP BY people_merged.id;")
     
-    overviewAuthors = dbGetQuery(gnome,"select people_merged.id as 'people',count(scmlog.id) as 'authors', count(distinct repository_id) as 'repositoryAuthor' 
+    overviewAuthors = dbGetQuery(gnome,"select people_merged.id as 'people',count(scmlog.id) as 'authors', count(distinct scmlog.repository_id) as 'repositoryAuthor' 
                                  FROM people_merged
                           LEFT OUTER JOIN scmlog ON scmlog.author_id = people_merged.id
                           GROUP BY people_merged.id;")
