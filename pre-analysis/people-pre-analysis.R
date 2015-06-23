@@ -27,8 +27,16 @@ repeat{
                                  FROM people_merged
                           LEFT OUTER JOIN scmlog ON scmlog.author_id = people_merged.id
                           GROUP BY people_merged.id;")
-    completedata <- merge(x=overviewCommitters, y=overviewAuthors)
-    write.csv(file="pOverview.csv", x=completedata)
+    people <- merge(x=overviewCommitters, y=overviewAuthors)
+    peoplePerRepo = dbGetQuery(gnome, "select distinct people_merged.id as 'people_id', scmlog.repository_id
+from people_merged
+left outer join identity_merging on people_merged.id = identity_merging.merged_id
+left outer join people on identity_merging.merged_id = people.id
+left outer join scmlog on people.id = scmlog.committer_id
+group by people_merged.id, scmlog.repository_id;
+")
+    output <- merge(people,peoplePerRepo,by.x='people',by.y='people_id');
+    write.csv(file="people.csv", x=output, na="0")
     
     
     
