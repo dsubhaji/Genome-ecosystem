@@ -60,48 +60,48 @@ public class NetworkBuilder
 		}
 		
 		System.out.println("Process completed go to directory to see file");
-		PrintStream myconsole = new PrintStream(new File(directory + "network.txt"));
+		PrintStream myconsole = new PrintStream(new File(directory + "network.net"));
     	System.setOut(myconsole);
     	
-		/**************Vertices ***************/
+    	/**************Vertices ***************/
         
-       int size = pList.size();
-       int idstatus = 0; 
-       int vert = 0;
+        int size = pList.size();
+        int idstatus = 0; 
+        int vert = 0;
+        
+        /*
+         * for loop to count different people_id (*Vertices __ )
+         */
+        for(int i=0; i < size; i++)
+  		{
+ 	   	
+ 	    String[] data=(pList.get(i)).split(",");
+ 	   	if(idstatus!=Integer.parseInt(data[1])) //Skip same people_id eg (2 2)
+ 	    {
+ 	   		vert++;
+ 	   		idstatus = Integer.parseInt(data[1]); //identify people_id
+ 	    }
+  		}
+        idstatus = 0;  //reset to 0 (people_id)
+        System.out.println(fileContent1 +vert);
+        
+        
+        /*
+         * for loop to print the people_id without repeating the same id
+         */
+        for(int i=0; i < size; i++)
+       	{
+     	   	
+     	   String[] data=(pList.get(i)).split(",");
+     	    if(idstatus!=Integer.parseInt(data[1]))
+     	    {
+     	   		System.out.println(data[1]);
+     	   		idstatus = Integer.parseInt(data[1]);
+     	    }
+       	}
        
-       /*
-        * for loop to count different people_id (*Vertices __ )
-        */
-       for(int i=0; i < size; i++)
- 		{
-	   	
-	    String[] data=(pList.get(i)).split(",");
-	   	if(idstatus!=Integer.parseInt(data[1])) //Skip same people_id eg (2 2)
-	    {
-	   		vert++;
-	   		idstatus = Integer.parseInt(data[1]); //identify people_id
-	    }
- 		}
-       idstatus = 0;  //reset to 0 (people_id)
-       System.out.println(fileContent1 +vert);
        
-       
-       /*
-        * for loop to print the people_id without repeating the same id
-        */
-       for(int i=0; i < size; i++)
-      	{
-    	   	
-    	   String[] data=(pList.get(i)).split(",");
-    	    if(idstatus!=Integer.parseInt(data[1]))
-    	    {
-    	   		System.out.println(data[1]);
-    	   		idstatus = Integer.parseInt(data[1]);
-    	    }
-      	}
-       
-       
-     /* 	/************* Edges****************/
+      	/************* Edges****************/
     	System.out.println(fileContent2);
     	
     	int[] states = new int[vert]; //to declare for later storing of vertices
@@ -115,8 +115,10 @@ public class NetworkBuilder
      	    String[] data=(pList.get(i)).split(",");
      	   	if(idstatus!=Integer.parseInt(data[1])) 
      	    {
+     	    	
      	   		idstatus = Integer.parseInt(data[1]); 
      	   		states[idstatus-1]=idstatus; //to store vertices
+     	    	
      	    }
        	}
        	
@@ -135,11 +137,10 @@ public class NetworkBuilder
 	       			for(int c=0; c<count;c++) // store repoid 1
 	       			{
 	       				String[] data=(pList.get(c)).split(",");
-	       				if(Integer.parseInt(data[1])==states[b])   // data[0] is 1, store repoid of all peopleid 1
+	       				if(Integer.parseInt(data[1])==states[b])   // store repoid of all peopleid 1
 	       				{
-	       					
 	       					repo[c]=Integer.parseInt(data[6]);
-	       					
+	       			
 	       				}	
 	       			}
 	       			
@@ -153,7 +154,6 @@ public class NetworkBuilder
 			       				if(Integer.parseInt(data[1])==states[d]) 
 			       				{
 			       					repo2[c]=Integer.parseInt(data[6]);  
-			       					
 			       				}	
 			       			}
 			       		
@@ -172,9 +172,10 @@ public class NetworkBuilder
 			       				}
 			       			}
 			       			 
-			       			
-			       			
-			       			System.out.println(vert1+" "+(d+1)+" "+common );
+			       			//remove null values 
+			       			if(common!=0){
+			       			System.out.println(vert1+" "+(d+1)+" "+common ); 
+			       			}
 			       			common=0;
 			       			// clear
 			       			for(int g=0; g<repo2.length; g++)
