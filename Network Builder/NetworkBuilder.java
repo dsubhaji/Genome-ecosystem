@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 
-public class Read4
+public class NetworkBuilder
 {
 	static String line;
 	static BufferedReader br1 = null, br2 =null;
